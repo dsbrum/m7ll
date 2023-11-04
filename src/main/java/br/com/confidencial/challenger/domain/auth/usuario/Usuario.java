@@ -1,4 +1,4 @@
-package br.com.confidencial.challenger.domain.usuario;
+package br.com.confidencial.challenger.domain.auth.usuario;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

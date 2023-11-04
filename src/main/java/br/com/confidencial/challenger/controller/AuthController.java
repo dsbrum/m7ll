@@ -1,8 +1,8 @@
 package br.com.confidencial.challenger.controller;
 
 
-import br.com.confidencial.challenger.domain.usuario.AuthData;
-import br.com.confidencial.challenger.domain.usuario.Usuario;
+import br.com.confidencial.challenger.domain.auth.usuario.AuthData;
+import br.com.confidencial.challenger.domain.auth.usuario.Usuario;
 import br.com.confidencial.challenger.infra.security.TokenDataJMT;
 import br.com.confidencial.challenger.infra.security.TokenService;
 import jakarta.validation.Valid;

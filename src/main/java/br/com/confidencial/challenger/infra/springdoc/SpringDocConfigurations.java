@@ -1,4 +1,4 @@
-package br.com.confidencial.challenger.springdoc;
+package br.com.confidencial.challenger.infra.springdoc;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

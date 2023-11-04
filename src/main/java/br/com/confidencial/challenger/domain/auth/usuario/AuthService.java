@@ -1,4 +1,4 @@
-package br.com.confidencial.challenger.domain.usuario;
+package br.com.confidencial.challenger.domain.auth.usuario;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

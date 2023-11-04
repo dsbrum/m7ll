@@ -1,6 +1,6 @@
 package br.com.confidencial.challenger.infra.security;
 
-import br.com.confidencial.challenger.domain.usuario.Usuario;
+import br.com.confidencial.challenger.domain.auth.usuario.Usuario;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -17,12 +17,14 @@ public class TokenService {
 
     @Value("${api.security.token.secret}")
     private String secret;
+    @Value("${api.security.token.iss}")
+    private String iss;
 
     public String gerarToken(Usuario usuario) {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
             return JWT.create()
-                    .withIssuer("API cashflow")
+                    .withIssuer(iss)
                     .withSubject(usuario.getLogin())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
@@ -35,7 +37,7 @@ public class TokenService {
         try {
             var algoritmo = Algorithm.HMAC256(secret);
             return JWT.require(algoritmo)
-                    .withIssuer("API cashflow")
+                    .withIssuer(iss)
                     .build()
                     .verify(tokenJWT)
                     .getSubject();

@@ -1,7 +1,7 @@
 package br.com.confidencial.challenger.infra.security;
 
 
-import br.com.confidencial.challenger.domain.usuario.UserRepository;
+import br.com.confidencial.challenger.domain.auth.usuario.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
