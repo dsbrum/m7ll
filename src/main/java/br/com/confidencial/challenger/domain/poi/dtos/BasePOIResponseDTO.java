@@ -1,3 +1,5 @@
 package br.com.confidencial.challenger.domain.poi.dtos;
 
-public record BasePOIResponseDTO (String nome,int tempo){}
+import java.util.List;
+
+public record BasePOIResponseDTO (String poi,String raio, String placa, List<String> tempo){}

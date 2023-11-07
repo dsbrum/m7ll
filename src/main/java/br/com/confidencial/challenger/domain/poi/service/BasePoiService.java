@@ -1,19 +1,24 @@
 package br.com.confidencial.challenger.domain.poi.service;
 
 import br.com.confidencial.challenger.domain.localizacao.Localizacao;
+import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
 import br.com.confidencial.challenger.domain.localizacao.repository.LocalizacaoRepository;
 import br.com.confidencial.challenger.domain.poi.BasePOI;
+import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.repository.BasePoiRepository;
 import br.com.confidencial.challenger.domain.poi.rule.RadiusCheckStrategy;
 import br.com.confidencial.challenger.domain.poi.rule.TimeCheckStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BasePoiService {
@@ -23,7 +28,7 @@ public class BasePoiService {
     @Autowired
     private final TimeCheckStrategy timeAccumStrg;
     @Autowired
-    BasePoiRepository poiRepo;
+    private BasePoiRepository poiRepo;
     @Autowired
     private LocalizacaoRepository locRepo;
 
@@ -33,45 +38,72 @@ public class BasePoiService {
     }
 
 
-    public Optional<BasePOI> getBasePoiPorLongELat(String longitude,String latitude){
-        return poiRepo.findByLongitudeAndLatitude(longitude,latitude);
+    public Optional<BasePOI> getBasePoiPorLongELat(String longitude, String latitude) {
+        return poiRepo.findByLongitudeAndLatitude(longitude, latitude);
     }
 
-    public void getReportTimePorPOI(String poi){
-        var poiOpt = poiRepo.findByNome(poi);
-        if(poiOpt.isPresent()){
-            var basePOI = poiOpt.get();
-            var lonPoi = Double.parseDouble(basePOI.getLongitude());
-            var latPoi = Double.parseDouble(basePOI.getLatitude());
-            List<Localizacao> localizacoes = locRepo.findAll();
-            List<Localizacao> locationIn = localizacoes.stream()
-                    .filter(localizacao -> {
-                        double lon = Double.parseDouble(localizacao.getLongitude());
-                        double lat = Double.parseDouble(localizacao.getLatitude());
-                        double haversine = radiusCheckStrg.calculateDistance(latPoi, lonPoi, lat, lon);
-                        double raio = basePOI.getRaio();
-                        return haversine <= raio;
-
-                    })
-                    .toList();
-            Optional<Localizacao> firstPoint = locationIn.stream().findFirst();
-            Optional<Localizacao> lastPoint = locationIn.stream()
-                    .reduce((first, second) -> second);
-            firstPoint.ifPresent(localizacao -> System.out.println(timeAccumStrg.getTime(localizacao.getDataPosicao().toString(), lastPoint.get().getDataPosicao().toString())));
-        }
-
-
-
+    public List<BasePOI> getBasePoi() {
+        return poiRepo.findAll();
+    }
+    public Page<BasePOI> getBasePoiPaginated(Pageable paginacao) {
+        return poiRepo.findAll(paginacao);
     }
 
-    private String getHoras(String dtini,String dtfim){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-        LocalDateTime dateTimeInicio = LocalDateTime.parse(dtini, formatter);
-        LocalDateTime dateTimeFim = LocalDateTime.parse(dtfim, formatter);
-        Duration duracao = Duration.between(dateTimeInicio, dateTimeFim);
-        long horas = duracao.toHours();
-        long minutos = duracao.toMinutes() % 60;
-        long segundos = duracao.getSeconds() % 60;
-        return String.format("%02d:%02d:%02d", horas, minutos, segundos);
+    public List<BasePOIMap> getReportTimePorPOI(String poi) {
+        return getReportForAllPoi(poiRepo.findAll(),locRepo.findAll()).get(poi);
     }
+    public List<BasePOIMap> getReportTimePorPOI(String poi,List<Localizacao> localizacoes) {
+        return getReportForAllPoi(poiRepo.findAll(),localizacoes).get(poi);
+    }
+    public Map<String, List<BasePOIMap>> getReportForAllPoi() {
+        return getReportForAllPoi(poiRepo.findAll(),locRepo.findAll());
+    }
+
+    public Map<String, List<BasePOIMap>> getReportForAllPoi(List<BasePOI> poiList,List<Localizacao> localizacoes) {
+        return poiList.parallelStream()
+                .collect(Collectors.toMap(
+                        BasePOI::getNome,
+                        basePOI -> getBasePOIMaps(basePOI,localizacoes)
+                ))
+                .entrySet()
+                .stream()
+                .filter(entry -> !entry.getValue().isEmpty())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    private List<BasePOIMap> getBasePOIMaps(BasePOI basePOI, List<Localizacao> localizacoesParameter) {
+        double lonPoi = Double.parseDouble(basePOI.getLongitude());
+        double latPoi = Double.parseDouble(basePOI.getLatitude());
+        double raio = basePOI.getRaio();
+
+        List<Localizacao> filteredLocalizacoes = localizacoesParameter.parallelStream()
+                .filter(localizacao -> {
+                    double lonLoc = Double.parseDouble(localizacao.getLongitude());
+                    double latLoc = Double.parseDouble(localizacao.getLatitude());
+                    return isWithinRadius(lonLoc, latLoc, lonPoi, latPoi, raio);
+                })
+                .toList();
+
+        Optional<Localizacao> firstPoint = filteredLocalizacoes.stream().findFirst();
+        Optional<Localizacao> lastPoint = filteredLocalizacoes.stream().reduce((first, second) -> second);
+
+        List<BasePOIMap> result = filteredLocalizacoes.stream()
+                .map(li -> createBasePOIMap(basePOI, li, firstPoint, lastPoint))
+                .distinct()
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+    private boolean isWithinRadius( double lon,double lat, double lonPoi, double latPoi, double raio) {
+        double haversine = radiusCheckStrg.calculateDistance(latPoi, lonPoi, lat, lon);
+        return haversine <= raio;
+    }
+
+    private BasePOIMap createBasePOIMap(BasePOI basePOI, Localizacao localizacao, Optional<Localizacao> firstPoint, Optional<Localizacao> lastPoint) {
+        String time = timeAccumStrg.getTime(firstPoint.get().getData().toString(), lastPoint.get().getData().toString());
+        return new BasePOIMap(basePOI.getNome(), basePOI.getRaio(), localizacao.getPlaca(), time);
+    }
+
 }

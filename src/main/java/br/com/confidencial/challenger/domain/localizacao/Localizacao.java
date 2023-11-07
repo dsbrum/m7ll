@@ -3,6 +3,7 @@ package br.com.confidencial.challenger.domain.localizacao;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 @Entity
 @Table(name = "localizacao")
@@ -18,7 +19,7 @@ public class Localizacao {
 
     @Column(name = "data_posicao", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date dataPosicao;
+    private LocalDateTime data;
 
     @Column(name = "velocidade", nullable = false)
     private int velocidade;

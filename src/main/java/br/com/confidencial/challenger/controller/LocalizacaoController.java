@@ -18,7 +18,7 @@ public class LocalizacaoController {
     @Autowired
     private LocalizacaoService service;
     @GetMapping("/{tag}")
-    public Page<LocalizacaoResponseDTO> movimentacaoCliente(@PathVariable String tag,
+    public Page<LocalizacaoResponseDTO> movimentacaoClientePorPlaca(@PathVariable String tag,
                                                             @PageableDefault(sort = "data_operacao",//
                                                                   direction = Sort.Direction.DESC, //
                                                                   page = 0,//
@@ -26,4 +26,5 @@ public class LocalizacaoController {
 
         return service.getLocalizationByTagPaginated(tag,paginacao);
     }
+
 }

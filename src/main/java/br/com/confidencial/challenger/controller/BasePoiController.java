@@ -3,6 +3,7 @@ package br.com.confidencial.challenger.controller;
 import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
 import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
 import br.com.confidencial.challenger.domain.poi.BasePOI;
+import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -34,6 +37,12 @@ public class BasePoiController {
     public void poi(@PathVariable String poi) {
 
          service.getReportTimePorPOI(poi);
+
+    }
+    @GetMapping("/")
+    public Map<String, List<BasePOIMap>> poi() {
+
+        return service.getReportForAllPoi();
 
     }
 

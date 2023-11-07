@@ -15,4 +15,6 @@ public interface BasePoiRepository extends JpaRepository<BasePOI, String> {
     Optional<BasePOI> findByLongitudeAndLatitude(String longitude,String latitude);
     Optional<BasePOI> findByNome(String name);
 
+    Page<BasePOI> findAll(Pageable pageable);
+
 }
