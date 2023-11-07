@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("parking")
-@SecurityRequirement(name = "bearer-key")
 public class ParadaController {
 
     @Autowired

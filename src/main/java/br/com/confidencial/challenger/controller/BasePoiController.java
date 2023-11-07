@@ -23,27 +23,21 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("poi")
-@SecurityRequirement(name = "bearer-key")
 public class BasePoiController {
 
     @Autowired
     private BasePoiService service;
     @GetMapping("/{longitude}/{latitude}")
-    public Optional<BasePOI> poi(@PathVariable String longitude, @PathVariable String latitude) {
-
-        return service.getBasePoiPorLongELat(longitude,latitude);
+    public ResponseEntity poi(@PathVariable String longitude, @PathVariable String latitude) {
+        return ResponseEntity.ok(service.getBasePoiPorLongELat(longitude,latitude));
     }
     @GetMapping("/{poi}")
-    public void poi(@PathVariable String poi) {
-
-         service.getReportTimePorPOI(poi);
-
+    public ResponseEntity poi(@PathVariable String poi) {
+        return ResponseEntity.ok(service.getReportTimePorPOI(poi));
     }
     @GetMapping("/")
-    public Map<String, List<BasePOIMap>> poi() {
-
-        return service.getReportForAllPoi();
-
+    public ResponseEntity poi() {
+        return ResponseEntity.ok(service.getReportForAllPoi());
     }
 
 }

@@ -1,18 +1,22 @@
 package br.com.confidencial.challenger.controller;
 
+import br.com.confidencial.challenger.domain.localizacao.Localizacao;
+import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoRequestDTO;
 import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
 import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("localizacao")
-@SecurityRequirement(name = "bearer-key")
 public class LocalizacaoController {
 
     @Autowired
@@ -25,6 +29,14 @@ public class LocalizacaoController {
                                                                   size = 10) Pageable paginacao) {
 
         return service.getLocalizationByTagPaginated(tag,paginacao);
+    }
+    @PostMapping("/")
+    public ResponseEntity<?> registraMovimentacaoCliente(@RequestBody @Valid LocalizacaoRequestDTO localizacaoRequestDTO) {
+        Optional<Localizacao> localizacao = service.salvarLocalizacao(localizacaoRequestDTO);
+        if (localizacao.isPresent()) {
+            return ResponseEntity.accepted().body(localizacao.get());
+        }
+        return ResponseEntity.badRequest().body("Falha ao salvar a localização. Verifique os dados fornecidos.");
     }
 
 }

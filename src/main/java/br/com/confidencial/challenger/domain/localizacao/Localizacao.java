@@ -2,12 +2,15 @@ package br.com.confidencial.challenger.domain.localizacao;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 @Entity
 @Table(name = "localizacao")
 @Data
+
 public class Localizacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +35,15 @@ public class Localizacao {
 
     @Column(name = "ignicao", nullable = false)
     private boolean ignicao;
+
+    public Localizacao() {
+    }
+    public Localizacao(String placa, LocalDateTime data, int velocidade, String longitude, String latitude, boolean ignicao) {
+        this.placa = placa;
+        this.data = data;
+        this.velocidade = velocidade;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.ignicao = ignicao;
+    }
 }
