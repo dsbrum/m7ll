@@ -1,25 +1,13 @@
 package br.com.confidencial.challenger.controller;
 
-import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
-import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
-import br.com.confidencial.challenger.domain.poi.BasePOI;
-import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
+import br.com.confidencial.challenger.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("poi")
@@ -29,21 +17,45 @@ public class BasePoiController {
     @Autowired
     private BasePoiService service;
     @GetMapping("/{longitude}/{latitude}")
-    public Optional<BasePOI> poi(@PathVariable String longitude, @PathVariable String latitude) {
-
-        return service.getBasePoiPorLongELat(longitude,latitude);
+    public ResponseEntity<?> poi(@PathVariable String longitude, @PathVariable String latitude) {
+        var basePoiPorLongELatOptReturn = service.getBasePoiPorLongELat(longitude, latitude);
+        if(basePoiPorLongELatOptReturn.isPresent()){
+            return ResponseEntity.ok(basePoiPorLongELatOptReturn.get());
+        }
+        throw new NotFoundException("Ponto de interesse não encontrado!");
     }
     @GetMapping("/{poi}")
-    public void poi(@PathVariable String poi) {
-
-         service.getReportTimePorPOI(poi);
-
+    public ResponseEntity<?> poi(@PathVariable String poi) {
+        var poiListReturn = service.getReportTimePorPOI(poi);
+        if(!poiListReturn.isEmpty()){
+            return ResponseEntity.ok(poiListReturn);
+        }
+        throw new NotFoundException("Ponto de interesse não encontrado!");
     }
     @GetMapping("/")
-    public Map<String, List<BasePOIMap>> poi() {
+    public ResponseEntity<?> poi() {
+        var poiListReturn = service.getReportForAllPoi();
+        if(!poiListReturn.isEmpty()){
+            return ResponseEntity.ok(poiListReturn);
+        }
+        throw new NotFoundException("Ponto de interesse não encontrado!");
+    }
 
-        return service.getReportForAllPoi();
+    @RequestMapping(
+            path = "/importcsv",
+            method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> importCSVFile(
+            @RequestParam("file") MultipartFile file) {
 
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("O arquivo está vazio.");
+        }
+
+        if(service.processarArquivoCSV(file)){
+            return ResponseEntity.ok("Importação bem-sucedida");
+        }
+        throw new UnsupportedOperationException("Erro na importação!");
     }
 
 }

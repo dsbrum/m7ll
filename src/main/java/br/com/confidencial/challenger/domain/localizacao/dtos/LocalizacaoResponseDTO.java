@@ -3,7 +3,6 @@ package br.com.confidencial.challenger.domain.localizacao.dtos;
 import br.com.confidencial.challenger.domain.localizacao.Localizacao;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 
 public record  LocalizacaoResponseDTO(String placa,
