@@ -1,6 +1,5 @@
 package br.com.confidencial.challenger.domain.poi.repository;
 
-import br.com.confidencial.challenger.domain.localizacao.Localizacao;
 import br.com.confidencial.challenger.domain.poi.BasePOI;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

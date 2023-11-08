@@ -2,11 +2,8 @@ package br.com.confidencial.challenger.domain.localizacao;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 @Entity
 @Table(name = "localizacao")
 @Data

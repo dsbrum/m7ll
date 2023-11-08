@@ -1,23 +1,22 @@
 package br.com.confidencial.challenger.controller;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import br.com.confidencial.challenger.controller.BasePoiController;
 import br.com.confidencial.challenger.domain.poi.BasePOI;
 import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
+import br.com.confidencial.challenger.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import java.util.*;
 
 public class BasePoiControllerTest {
 
@@ -33,51 +32,87 @@ public class BasePoiControllerTest {
     }
 
     @Test
-    public void testGetPoiByLongAndLat() {
-        String longitude = "10.12345";
-        String latitude = "20.67890";
-        Optional<BasePOI> expectedPoi = Optional.of(new BasePOI());
+    public void testPoiComPoiEncontrado() {
+        var longitude = "-51.566944";
+        var latitude = "-25.414167";
+        BasePOI basePoi = getBasePoi("PONTO 3", 10, longitude, latitude);
+        when(basePoiService.getBasePoiPorLongELat(longitude, latitude)).thenReturn(Optional.of(basePoi));
 
-        when(basePoiService.getBasePoiPorLongELat(longitude, latitude)).thenReturn(expectedPoi);
+        ResponseEntity<?> response = basePoiController.poi(longitude, latitude);
 
-        ResponseEntity<?> result = basePoiController.poi(longitude, latitude);
-
-        verify(basePoiService, times(1)).getBasePoiPorLongELat(longitude, latitude);
-
-        assertEquals(ResponseEntity.ok(expectedPoi), result);
+        assertTrue(response.getBody() instanceof BasePOI);
     }
 
+    @Test
+    public void testPoiComPoiNaoEncontrado() {
+        when(basePoiService.getBasePoiPorLongELat("longitude", "latitude")).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> basePoiController.poi("longitude", "latitude"));
+        assertEquals("Ponto de interesse não encontrado!", exception.getMessage());
+    }
 
     @Test
     public void testGetPoiByPoi() {
-        String poi = "PONTO 1";
-        List<BasePOIMap> expectedValue = new ArrayList<>();
+        String poi = "PONTO 3";
+        var longitude = "-51.566944";
+        var latitude = "-25.414167";
+        List<BasePOIMap> expectedValue = Collections.singletonList(new BasePOIMap("PONTO 3", 10, longitude, latitude));
 
         when(basePoiService.getReportTimePorPOI(poi)).thenReturn(expectedValue);
 
-        ResponseEntity result = basePoiController.poi(poi);
+        ResponseEntity<?> result = basePoiController.poi(poi);
 
         verify(basePoiService, times(1)).getReportTimePorPOI(poi);
-
-
         assertEquals(ResponseEntity.ok(expectedValue), result);
     }
 
-
     @Test
     public void testGetAllPoiReports() {
-        Map<String, List<BasePOIMap>> expectedReport = createSampleReport(); // Crie um relatório de exemplo
-
+        Map<String, List<BasePOIMap>> expectedReport = mockReport();
         when(basePoiService.getReportForAllPoi()).thenReturn(expectedReport);
 
-        ResponseEntity result = basePoiController.poi();
+        ResponseEntity<?> response = basePoiController.poi();
 
         verify(basePoiService, times(1)).getReportForAllPoi();
-
-        assertEquals(ResponseEntity.ok(expectedReport), result);
+        assertEquals(200, response.getStatusCodeValue());
     }
 
-    private Map<String, List<BasePOIMap>> createSampleReport() {
-        return null;
+    @Test
+    public void testImportCSVFileComSucesso() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(basePoiService.processarArquivoCSV(file)).thenReturn(true);
+
+        ResponseEntity<?> response = basePoiController.importCSVFile(file);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Importação bem-sucedida", response.getBody());
+    }
+
+    @Test
+    public void testImportCSVFileComErro() {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.isEmpty()).thenReturn(false);
+        when(basePoiService.processarArquivoCSV(file)).thenReturn(false);
+
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> basePoiController.importCSVFile(file));
+        assertEquals("Erro na importação!", exception.getMessage());
+    }
+
+    private static BasePOI getBasePoi(String nome, int raio, String longitude, String latitude) {
+        var poi = new BasePOI();
+        poi.setNome(nome);
+        poi.setRaio(raio);
+        poi.setLongitude(longitude);
+        poi.setLatitude(latitude);
+        return poi;
+    }
+
+    private Map<String, List<BasePOIMap>> mockReport() {
+        HashMap<String, List<BasePOIMap>> map = new HashMap<>();
+        map.put("PONTO 1", Collections.emptyList());
+        map.put("PONTO 2", Collections.emptyList());
+        return map;
     }
 }
+

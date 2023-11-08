@@ -28,7 +28,7 @@ Back-end:
 * Docker version 24.0.6, build ed223bc
 * Docker Compose version v2.23.0-desktop.1
 * Intelijj 2023.1.1 CE
-* Flayway 9.5.1
+* Flyway 9.5.1
 ## Variáveis de Ambiente
 
 É preciso configurar a variavel de ambiente como ambiente de dev conforme comando abaixo:

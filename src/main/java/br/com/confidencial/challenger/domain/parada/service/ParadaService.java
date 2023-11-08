@@ -1,24 +1,19 @@
 package br.com.confidencial.challenger.domain.parada.service;
 
 import br.com.confidencial.challenger.domain.localizacao.Localizacao;
-import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
-import br.com.confidencial.challenger.domain.localizacao.repository.LocalizacaoRepository;
 import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
-import br.com.confidencial.challenger.domain.poi.BasePOI;
 import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ParadaService {

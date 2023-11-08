@@ -30,8 +30,12 @@ public class LocalizacaoController {
                                                                   direction = Sort.Direction.DESC, //
                                                                   page = 0,//
                                                                   size = 10) Pageable paginacao) {
+        Page<LocalizacaoResponseDTO> localizationByTagPaginated = service.getLocalizationByTagPaginated(tag, paginacao);
+            if(!localizationByTagPaginated.isEmpty()){
+                return localizationByTagPaginated;
+            }
+        throw new NotFoundException("Localizações não encontradas para o cliente!");
 
-        return service.getLocalizationByTagPaginated(tag,paginacao);
     }
     @PostMapping("/")
     public ResponseEntity<?> registraMovimentacaoCliente(@RequestBody @Valid LocalizacaoRequestDTO localizacaoRequestDTO) {
@@ -41,7 +45,7 @@ public class LocalizacaoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseResult<>(localizacao.get()));
         }
 
-        throw new UnsupportedOperationException("Falha ao remover a localização. Verifique o ID fornecido.");
+        throw new UnsupportedOperationException("Falha ao cadastrar a localização. Verifique as informações fornecidas.");
 
     }
 

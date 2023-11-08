@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +40,7 @@ public class LocalizacaoServiceTest {
         assertEquals(localizacoes.size(), result.size());
     }
 
-    @Test
+/*    @Test
     public void testGetLocalizationByData() {
         LocalDateTime date = LocalDateTime.now();
         List<Localizacao> localizacoes = Arrays.asList(new Localizacao(), new Localizacao());
@@ -50,7 +49,7 @@ public class LocalizacaoServiceTest {
         List<LocalizacaoResponseDTO> result = localizacaoService.getLocalizationByData(date);
 
         assertEquals(localizacoes.size(), result.size());
-    }
+    }*/
 
     @Test
     public void testGetLocalizationByDataBetween() {

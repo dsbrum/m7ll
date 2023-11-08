@@ -1,7 +1,6 @@
 package br.com.confidencial.challenger.domain.poi.service;
 
 import br.com.confidencial.challenger.domain.localizacao.Localizacao;
-import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
 import br.com.confidencial.challenger.domain.localizacao.repository.LocalizacaoRepository;
 import br.com.confidencial.challenger.domain.poi.BasePOI;
 import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
@@ -21,12 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,10 +67,11 @@ public class BasePoiService {
         try (InputStream inputStream = file.getInputStream();
              CSVReader csvReader = new CSVReader(new InputStreamReader(inputStream))) {
             String[] linha;
-            boolean flagHeader = true;
+            boolean isHeaderRow = true;
+
             while ((linha = csvReader.readNext()) != null) {
-                if(flagHeader){
-                    flagHeader=false;
+                if (isHeaderRow) {
+                    isHeaderRow = false;
                     continue;
                 }
                 BasePOI poi = parseLinhaParaPOI(linha);
@@ -87,14 +82,17 @@ public class BasePoiService {
             return true;
         } catch (IOException e) {
             log.error("Erro ao processar o arquivo CSV: " + e.getMessage());
+            return false;
         } catch (CsvValidationException e) {
             throw new RuntimeException("Erro na validação do arquivo CSV: " + e.getMessage(), e);
         }
-        return false;
     }
 
     @Cacheable("paradasPoiCliente")
     public Map<String, List<BasePOIMap>> getReportForAllPoi(List<BasePOI> poiList,List<Localizacao> localizacoes) {
+        if(localizacoes.isEmpty()){
+            return new HashMap<>();
+        }
         return poiList.parallelStream()
                 .collect(Collectors.toMap(
                         BasePOI::getNome,
@@ -108,6 +106,7 @@ public class BasePoiService {
 
 
     private List<BasePOIMap> getBasePOIMaps(BasePOI basePOI, List<Localizacao> localizacoesParameter) {
+
         double lonPoi = Double.parseDouble(basePOI.getLongitude());
         double latPoi = Double.parseDouble(basePOI.getLatitude());
         double raio = basePOI.getRaio();
@@ -120,39 +119,44 @@ public class BasePoiService {
                 })
                 .toList();
 
-        Optional<Localizacao> firstPoint = filteredLocalizacoes.stream().findFirst();
-        Optional<Localizacao> lastPoint = filteredLocalizacoes.stream().reduce((first, second) -> second);
+        Optional<Localizacao> firstPointOpt = filteredLocalizacoes.stream().findFirst();
+        Optional<Localizacao> lastPointOpt = filteredLocalizacoes.stream().reduce((first, second) -> second);
 
-        List<BasePOIMap> result = filteredLocalizacoes.stream()
-                .map(li -> createBasePOIMap(basePOI, li, firstPoint, lastPoint))
+        String firstPointDateSTR = firstPointOpt.map(localizacao -> localizacao.getData().toString()).orElse("");
+        String LastPointDateSTR = lastPointOpt.map(localizacao -> localizacao.getData().toString()).orElse("");
+
+        return filteredLocalizacoes.stream()
+                .map(li -> createBasePOIMap(basePOI, li, firstPointDateSTR, LastPointDateSTR))
                 .distinct()
                 .collect(Collectors.toList());
-
-        return result;
     }
+
 
     private boolean isWithinRadius( double lon,double lat, double lonPoi, double latPoi, double raio) {
         double haversine = radiusCheckStrg.calculateDistance(latPoi, lonPoi, lat, lon);
         return haversine <= raio;
     }
 
-    private BasePOIMap createBasePOIMap(BasePOI basePOI, Localizacao localizacao, Optional<Localizacao> firstPoint, Optional<Localizacao> lastPoint) {
-        String time = timeAccumStrg.getTime(firstPoint.get().getData().toString(), lastPoint.get().getData().toString());
+    private BasePOIMap createBasePOIMap(BasePOI basePOI, Localizacao localizacao, String firstPointDate, String lastPointDate) {
+        String time = timeAccumStrg.getTime(firstPointDate, lastPointDate);
         return new BasePOIMap(basePOI.getNome(), basePOI.getRaio(), localizacao.getPlaca(), time);
     }
 
     private BasePOI parseLinhaParaPOI(String[] linha) {
         if (linha.length < 4) {
-            log.warn("Linha do arquivo CSV com dados insuficientes: " + Arrays.toString(linha));
+            log.warn("Linha CSV incompleta: " + Arrays.toString(linha));
             return null;
         }
-
         BasePOI poi = new BasePOI();
         poi.setNome(linha[0]);
-        poi.setRaio(Integer.parseInt(linha[1]));
-        poi.setLatitude(linha[2]);
-        poi.setLongitude(linha[3]);
-
+        try {
+            poi.setRaio(Integer.parseInt(linha[1]));
+            poi.setLatitude(linha[2]);
+            poi.setLongitude(linha[3]);
+        } catch (NumberFormatException e) {
+            log.error("Erro na conversão de dados da linha CSV: " + e.getMessage());
+            return null;
+        }
         return poi;
     }
 

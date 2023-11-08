@@ -1,8 +1,5 @@
 package br.com.confidencial.challenger.infra.springdoc;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springdoc.core.properties.SwaggerUiConfigParameters;
 import org.springframework.context.annotation.Bean;
