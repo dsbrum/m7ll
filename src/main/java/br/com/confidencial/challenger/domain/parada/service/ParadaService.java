@@ -62,30 +62,42 @@ public class ParadaService {
         return new PageImpl<>(new ArrayList<>(reportForAllPoi.entrySet()));
     }
     @Cacheable("paradasPoiCliente")
-    public Map<String, Map<String, String>> getAll(List<BasePOI> listaDePontos, List<Localizacao> posicoes){
-
+    public Map<String, Map<String, String>> getAll(List<BasePOI> listaDePontos, List<Localizacao> posicoes) {
         Map<String, Map<String, Long>> tempoPorPOIPlaca = new HashMap<>();
+
         for (int i = 0; i < posicoes.size() - 1; i++) {
             var posicaoAtual = posicoes.get(i);
             var posicaoSeguinte = posicoes.get(i + 1);
 
             for (BasePOI poi : listaDePontos) {
-                if(areaStrgy.checkInside(Double.parseDouble(posicaoAtual.getLatitude()),
-                                    Double.parseDouble(posicaoAtual.getLongitude()),
-                                    Double.parseDouble(poi.getLatitude()),
-                                    Double.parseDouble(poi.getLongitude()),poi.getRaio())){
+                if (areaStrgy.checkInside(
+                        Double.parseDouble(posicaoAtual.getLatitude()),
+                        Double.parseDouble(posicaoAtual.getLongitude()),
+                        Double.parseDouble(poi.getLatitude()),
+                        Double.parseDouble(poi.getLongitude()), poi.getRaio())) {
 
-                    long tempoDentroDoPOI = getTimeMiliSeconds(posicaoSeguinte.getData()) - getTimeMiliSeconds(posicaoAtual.getData());
-                    if (!tempoPorPOIPlaca.containsKey(posicaoAtual.getPlaca())) {
-                        tempoPorPOIPlaca.put(posicaoAtual.getPlaca(), new HashMap<>());
-                    }
-                    Map<String, Long> tempoPorPOI = tempoPorPOIPlaca.get(posicaoAtual.getPlaca());
-                    tempoPorPOI.put(poi.getNome(), tempoPorPOI.getOrDefault(poi.getNome(), 0L) + tempoDentroDoPOI);
-
+                    processTempoPorPlaca(tempoPorPOIPlaca, posicaoAtual, posicaoSeguinte, poi);
                 }
             }
         }
+
         return formatResponseTimes(tempoPorPOIPlaca);
+    }
+
+    private void processTempoPorPlaca(
+            Map<String, Map<String, Long>> tempoPorPOIPlaca,
+            Localizacao posicaoAtual,
+            Localizacao posicaoSeguinte,
+            BasePOI poi) {
+        if (posicaoAtual.getPlaca().equalsIgnoreCase(posicaoSeguinte.getPlaca())) {
+            Map<String, Long> tempoPorPOI = tempoPorPOIPlaca.computeIfAbsent(
+                    posicaoAtual.getPlaca(),
+                    k -> new HashMap<>()
+            );
+
+            long tempoDentroDoPOI = getTimeMiliSeconds(posicaoSeguinte.getData()) - getTimeMiliSeconds(posicaoAtual.getData());
+            tempoPorPOI.put(poi.getNome(), tempoPorPOI.getOrDefault(poi.getNome(), 0L) + tempoDentroDoPOI);
+        }
     }
 
     public Map<String, Map<String, String>> formatResponseTimes(Map<String, Map<String, Long>> responseTimes) {

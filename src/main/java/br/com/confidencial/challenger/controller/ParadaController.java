@@ -1,7 +1,5 @@
 package br.com.confidencial.challenger.controller;
 
-import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
-import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
 import br.com.confidencial.challenger.domain.parada.service.ParadaService;
 import br.com.confidencial.challenger.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
