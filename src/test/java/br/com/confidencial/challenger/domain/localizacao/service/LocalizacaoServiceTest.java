@@ -40,16 +40,6 @@ public class LocalizacaoServiceTest {
         assertEquals(localizacoes.size(), result.size());
     }
 
-/*    @Test
-    public void testGetLocalizationByData() {
-        LocalDateTime date = LocalDateTime.now();
-        List<Localizacao> localizacoes = Arrays.asList(new Localizacao(), new Localizacao());
-        Mockito.when(localizacaoRepository.findByData(date)).thenReturn(localizacoes);
-
-        List<LocalizacaoResponseDTO> result = localizacaoService.getLocalizationByData(date);
-
-        assertEquals(localizacoes.size(), result.size());
-    }*/
 
     @Test
     public void testGetLocalizationByDataBetween() {
