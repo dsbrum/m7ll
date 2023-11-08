@@ -28,7 +28,7 @@ Back-end:
 * Docker version 24.0.6, build ed223bc
 * Docker Compose version v2.23.0-desktop.1
 * Intelijj 2023.1.1 CE
-* Flayway 9.5.1
+* Flyway 9.5.1
 ## Variáveis de Ambiente
 
 É preciso configurar a variavel de ambiente como ambiente de dev conforme comando abaixo:
@@ -50,7 +50,7 @@ Realize o import do projeto em sua IDE de preferência, após êxito no import, 
 
 ## Diagrama da estrutura proposta docker compose
 
-![Arquitetura_Macro](images/MacroArq.jpg)
+![Arquitetura_Macro](external_resources/MacroArq3.jpg)
 ## Documentação da API
 
 #### Interface SWAGGER
@@ -66,4 +66,6 @@ http://localhost:8080/v3/api-docs
 
 - [Fórmula de haversine](https://pt.wikipedia.org/wiki/F%C3%B3rmula_de_Haversine)
 - [Padrão de projeto strategy](https://refactoring.guru/pt-br/design-patterns/strategy)
+- [Clean Code - Guia e Exemplos](https://dev.to/andrebaltieri/clean-code-guia-e-exemplos-1nd0)
+- [O que é uma Arquitetura Hexagonal?](https://engsoftmoderna.info/artigos/arquitetura-hexagonal.html)
 

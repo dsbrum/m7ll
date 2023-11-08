@@ -51,31 +51,6 @@ public class BasePoiControllerTest {
         assertEquals("Ponto de interesse não encontrado!", exception.getMessage());
     }
 
-    @Test
-    public void testGetPoiByPoi() {
-        String poi = "PONTO 3";
-        var longitude = "-51.566944";
-        var latitude = "-25.414167";
-        List<BasePOIMap> expectedValue = Collections.singletonList(new BasePOIMap("PONTO 3", 10, longitude, latitude));
-
-        when(basePoiService.getReportTimePorPOI(poi)).thenReturn(expectedValue);
-
-        ResponseEntity<?> result = basePoiController.poi(poi);
-
-        verify(basePoiService, times(1)).getReportTimePorPOI(poi);
-        assertEquals(ResponseEntity.ok(expectedValue), result);
-    }
-
-    @Test
-    public void testGetAllPoiReports() {
-        Map<String, List<BasePOIMap>> expectedReport = mockReport();
-        when(basePoiService.getReportForAllPoi()).thenReturn(expectedReport);
-
-        ResponseEntity<?> response = basePoiController.poi();
-
-        verify(basePoiService, times(1)).getReportForAllPoi();
-        assertEquals(200, response.getStatusCodeValue());
-    }
 
     @Test
     public void testImportCSVFileComSucesso() {

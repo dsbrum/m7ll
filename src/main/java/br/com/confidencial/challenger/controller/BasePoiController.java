@@ -1,9 +1,14 @@
 package br.com.confidencial.challenger.controller;
 
+import br.com.confidencial.challenger.domain.poi.BasePOI;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
 import br.com.confidencial.challenger.exceptions.NotFoundException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,20 +31,24 @@ public class BasePoiController {
     }
     @GetMapping("/{poi}")
     public ResponseEntity<?> poi(@PathVariable String poi) {
-        var poiListReturn = service.getReportTimePorPOI(poi);
+        var poiListReturn = service.getBasePoiByName(poi);
         if(!poiListReturn.isEmpty()){
             return ResponseEntity.ok(poiListReturn);
         }
         throw new NotFoundException("Ponto de interesse não encontrado!");
     }
     @GetMapping("/")
-    public ResponseEntity<?> poi() {
-        var poiListReturn = service.getReportForAllPoi();
+    public Page<BasePOI> poi(@PageableDefault(sort = "nome",//
+                                    direction = Sort.Direction.DESC, //
+                                    page = 0,//
+                                    size = 10) Pageable paginacao) {
+        var poiListReturn = service.getBasePoiPaginated(paginacao);
         if(!poiListReturn.isEmpty()){
-            return ResponseEntity.ok(poiListReturn);
+            return poiListReturn;
         }
         throw new NotFoundException("Ponto de interesse não encontrado!");
     }
+
 
     @RequestMapping(
             path = "/importcsv",

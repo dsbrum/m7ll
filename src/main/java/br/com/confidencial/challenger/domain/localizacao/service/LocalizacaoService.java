@@ -26,9 +26,7 @@ public class LocalizacaoService {
     public List<LocalizacaoResponseDTO> getLocalizationResponseByTag(String tag) {
         return locRepo.findByPlaca(tag).stream().map(LocalizacaoResponseDTO::new).collect(Collectors.toList());
     }
-    public List<LocalizacaoResponseDTO> getLocalizationByData(LocalDateTime date) {
-        return locRepo.findByData(date).stream().map(LocalizacaoResponseDTO::new).collect(Collectors.toList());
-    }
+
     public List<Localizacao> getLocalizationByDataBetween(LocalDateTime dateIni,LocalDateTime dateFim) {
         return locRepo.findByDataBetween(dateIni,dateFim);
     }
@@ -69,4 +67,5 @@ public class LocalizacaoService {
         }
         return false;
     }
+
 }
