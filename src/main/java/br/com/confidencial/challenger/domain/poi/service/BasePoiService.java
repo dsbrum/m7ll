@@ -8,19 +8,29 @@ import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.repository.BasePoiRepository;
 import br.com.confidencial.challenger.domain.poi.rule.RadiusCheckStrategy;
 import br.com.confidencial.challenger.domain.poi.rule.TimeCheckStrategy;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BasePoiService {
 
     @Autowired
@@ -59,6 +69,31 @@ public class BasePoiService {
         return getReportForAllPoi(poiRepo.findAll(),locRepo.findAll());
     }
 
+    public boolean processarArquivoCSV(MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream();
+             CSVReader csvReader = new CSVReader(new InputStreamReader(inputStream))) {
+            String[] linha;
+            boolean flagHeader = true;
+            while ((linha = csvReader.readNext()) != null) {
+                if(flagHeader){
+                    flagHeader=false;
+                    continue;
+                }
+                BasePOI poi = parseLinhaParaPOI(linha);
+                if (poi != null) {
+                    poiRepo.save(poi);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            log.error("Erro ao processar o arquivo CSV: " + e.getMessage());
+        } catch (CsvValidationException e) {
+            throw new RuntimeException("Erro na validação do arquivo CSV: " + e.getMessage(), e);
+        }
+        return false;
+    }
+
+    @Cacheable("paradasPoiCliente")
     public Map<String, List<BasePOIMap>> getReportForAllPoi(List<BasePOI> poiList,List<Localizacao> localizacoes) {
         return poiList.parallelStream()
                 .collect(Collectors.toMap(
@@ -104,6 +139,21 @@ public class BasePoiService {
     private BasePOIMap createBasePOIMap(BasePOI basePOI, Localizacao localizacao, Optional<Localizacao> firstPoint, Optional<Localizacao> lastPoint) {
         String time = timeAccumStrg.getTime(firstPoint.get().getData().toString(), lastPoint.get().getData().toString());
         return new BasePOIMap(basePOI.getNome(), basePOI.getRaio(), localizacao.getPlaca(), time);
+    }
+
+    private BasePOI parseLinhaParaPOI(String[] linha) {
+        if (linha.length < 4) {
+            log.warn("Linha do arquivo CSV com dados insuficientes: " + Arrays.toString(linha));
+            return null;
+        }
+
+        BasePOI poi = new BasePOI();
+        poi.setNome(linha[0]);
+        poi.setRaio(Integer.parseInt(linha[1]));
+        poi.setLatitude(linha[2]);
+        poi.setLongitude(linha[3]);
+
+        return poi;
     }
 
 }

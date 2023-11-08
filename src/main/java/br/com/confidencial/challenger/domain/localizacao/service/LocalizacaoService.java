@@ -5,6 +5,7 @@ import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoRequest
 import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
 import br.com.confidencial.challenger.domain.localizacao.repository.LocalizacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -57,5 +58,15 @@ public class LocalizacaoService {
             return false;
         }
         return true;
+    }
+
+    @CacheEvict(value = "paradasPoiCliente", key = "#id")
+    public boolean removerLocalizacao(long id) {
+        Optional<Localizacao> byId = locRepo.findById(id);
+        if (byId.isPresent()) {
+            locRepo.delete(byId.get());
+            return !locRepo.existsById(id);
+        }
+        return false;
     }
 }

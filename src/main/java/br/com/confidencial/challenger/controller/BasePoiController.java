@@ -1,25 +1,14 @@
 package br.com.confidencial.challenger.controller;
 
-import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
-import br.com.confidencial.challenger.domain.localizacao.service.LocalizacaoService;
-import br.com.confidencial.challenger.domain.poi.BasePOI;
-import br.com.confidencial.challenger.domain.poi.dtos.BasePOIMap;
 import br.com.confidencial.challenger.domain.poi.service.BasePoiService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("poi")
@@ -38,6 +27,23 @@ public class BasePoiController {
     @GetMapping("/")
     public ResponseEntity poi() {
         return ResponseEntity.ok(service.getReportForAllPoi());
+    }
+
+    @RequestMapping(
+            path = "/importcsv",
+            method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> importCSVFile(
+            @RequestParam("file") MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("O arquivo está vazio.");
+        }
+
+        if(service.processarArquivoCSV(file)){
+            return ResponseEntity.ok("Importação bem-sucedida");
+        }
+        throw new UnsupportedOperationException("Erro na importação!");
     }
 
 }

@@ -50,7 +50,7 @@ Realize o import do projeto em sua IDE de preferência, após êxito no import, 
 
 ## Diagrama da estrutura proposta docker compose
 
-![Arquitetura_Macro](images/MacroArq.jpg)
+![Arquitetura_Macro](resources/MacroArq2.jpg)
 ## Documentação da API
 
 #### Interface SWAGGER
