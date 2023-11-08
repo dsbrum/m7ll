@@ -1,6 +1,6 @@
 package br.com.confidencial.challenger.controller;
 
-
+import br.com.confidencial.challenger.controller.dto.ResponseResult;
 import br.com.confidencial.challenger.domain.localizacao.Localizacao;
 import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoRequestDTO;
 import br.com.confidencial.challenger.domain.localizacao.dtos.LocalizacaoResponseDTO;
