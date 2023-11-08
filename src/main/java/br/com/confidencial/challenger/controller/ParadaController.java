@@ -37,10 +37,4 @@ public class ParadaController {
 
          throw  new NotFoundException("Dados não encontrado na base!");
     }
-/*    @GetMapping("/all")
-    public void paradaClienteAll() {
-
-        service.getAll();
-
-    }*/
 }
