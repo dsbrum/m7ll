@@ -2,6 +2,7 @@ package br.com.confidencial.challenger.domain.poi.service;
 
 import br.com.confidencial.challenger.domain.poi.BasePOI;
 import br.com.confidencial.challenger.domain.poi.repository.BasePoiRepository;
+import br.com.confidencial.challenger.exceptions.CsvProcessingException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -60,10 +61,10 @@ public class BasePoiService {
             return true;
         } catch (IOException e) {
             log.error("Erro ao processar o arquivo CSV: " + e.getMessage());
-            return false;
+            throw new CsvProcessingException("Erro ao processar o arquivo CSV.");
         } catch (CsvValidationException e) {
-            throw new RuntimeException("Erro na validação do arquivo CSV: " + e.getMessage(), e);
-        }
+            log.error("Erro na validação do arquivo CSV: " + e.getMessage());
+            throw new CsvProcessingException("Erro na validação do arquivo CSV.");        }
     }
 
 
@@ -80,7 +81,7 @@ public class BasePoiService {
             poi.setLongitude(linha[3]);
         } catch (NumberFormatException e) {
             log.error("Erro na conversão de dados da linha CSV: " + e.getMessage());
-            return null;
+            throw new CsvProcessingException("Erro na conversão de dados da linha CSV.");
         }
         return poi;
     }

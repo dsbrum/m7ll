@@ -17,4 +17,9 @@ public class HandlerException {
         ExceptionResponse erroResposta = new ExceptionResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
         return new ResponseEntity<>(erroResposta, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(CsvProcessingException.class)
+    public ResponseEntity<ExceptionResponse> handleCsvProcessingException(NotFoundException ex) {
+        ExceptionResponse erroResposta = new ExceptionResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage());
+        return new ResponseEntity<>(erroResposta, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 }
