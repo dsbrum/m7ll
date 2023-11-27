@@ -38,7 +38,7 @@ Back-end:
 
 É necessário previamente rodar o docker compose para subir as dependências externas do projeto, logo na pasta raiz do projeto onde está o arquivo docker-compose.yaml executará o comando:
 ````bash 
- docker-compose up -d
+ docker-compose up -builder
 ```` 
 Assim que realizar o do os downloads das imagens, extrair e subir os containers dentro da rede.
 
@@ -48,9 +48,6 @@ Realize o import do projeto em sua IDE de preferência, após êxito no import, 
  mvn clean install 
 ``` 
 
-## Diagrama da estrutura proposta docker compose
-
-![Arquitetura_Macro](external_resources/MacroArq3.jpg)
 ## Documentação da API
 
 #### Interface SWAGGER
